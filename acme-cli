@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+'''
+Python ACME Network Client
+'''
+import xmlrpc.client
+import argparse
+
+ACME_RPC_PORT = 8000
+ACME_RPC_HOSTNAME = "baylibre-acme.local"
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-s", "--server", help="Specify ACME Hostname")
+parser.add_argument("command", help="ACME Command, use 'help' to get all commands")
+parser.add_argument("args", nargs='?', help="ACME Command Arguments")
+args = parser.parse_args()
+
+if args.server:
+	serveraddr = "%s:%d" % (args.server, ACME_RPC_PORT)
+else:
+	serveraddr = "%s:%d" % (ACME_RPC_HOSTNAME, ACME_RPC_PORT)
+
+s = xmlrpc.client.ServerProxy("http://%s/acme" % serveraddr)
+
+if args.command == "version":
+	print(s.version())
+elif args.command == "system_reboot":
+	# check device is online
+	test = s.version()
+	try:
+		s.system_reboot()
+	except:
+		print("Reboot sent")
+elif args.command == "info":
+	if not args.args:
+		print("Info command parameters : <probe>")
+	else:
+		print(s.info(args.args))
+elif args.command == "switch_on":
+	if not args.args:
+		print("Switch command parameters : <probe>")
+	else:
+		print(s.switch_on(args.args))
+elif args.command == "switch_off":
+	if not args.args:
+		print("Switch command parameters : <probe>")
+	else:
+		print(s.switch_off(args.args))
+elif args.command == "help":
+	print("Supported commands :")
+	for command in s.system.listMethods():
+		if not command.startswith("system."):
+			helpstr = s.system.methodHelp(command)
+			print("\t%s : %s" % (command, helpstr[1:]))
+else:
+	print("Unknown command %s" % args.command)
