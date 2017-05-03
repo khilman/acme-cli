@@ -5,6 +5,7 @@ Python ACME Network Client
 '''
 import xmlrpc.client
 import argparse
+import time
 
 ACME_RPC_PORT = 8000
 ACME_RPC_HOSTNAME = "baylibre-acme.local"
@@ -46,6 +47,13 @@ elif args.command == "switch_off":
 		print("Switch command parameters : <probe>")
 	else:
 		print(s.switch_off(args.args))
+elif args.command == "reset":
+	if not args.args:
+		print("Switch command parameters : <probe>")
+	else:
+		print(s.switch_off(args.args))
+		time.sleep(1)
+		print(s.switch_on(args.args))
 elif args.command == "help":
 	print("Supported commands :")
 	for command in s.system.listMethods():
